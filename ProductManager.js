@@ -34,27 +34,21 @@ class ProductManager {
 
         product.id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
 
-        products.push(product);
+        this.products.push(product);
         this.saveProducts(products);
     }
 
     getProducts() {
-        try {
-            const data = fs.readFileSync(this.filePath, 'utf-8');
-            return JSON.parse(data);
-        } catch (error) {
-            return [];
-        }
+        return this.products;
     }
 
     getProductById(id) {
-        const products = this.getProducts();
-        return products.find(product => product.id === id);
+        return this.products.find(product => product.id === id);
     }
 
     updateProduct(id, updatedProduct) {
-        let products = this.getProducts();
-        const index = products.findIndex(product => product.id === id);
+        const index = this.products.findIndex(product => product.id === id);
+
         if (index !== -1) {
     
             if (!updatedProduct.title || !updatedProduct.description || !updatedProduct.price || !updatedProduct.thumbnail || !updatedProduct.code || !updatedProduct.stock) {
@@ -69,21 +63,21 @@ class ProductManager {
                 throw new Error("Ya existe un producto con ese código");
             }
 
-            products[index] = { ...products[index], ...updatedProduct };
-            this.saveProducts(products);
+            
+            this.products[index] = { ...this.products[index], ...updatedProduct };
+            this.saveProducts();
             return true;
         }
         return false;
     }
 
     deleteProduct(id) {
-        let products = this.getProducts();
-        products = products.filter(product => product.id !== id);
-        this.saveProducts(products);
+        this.products = this.products.filter(product => product.id !== id);
+        this.saveProducts();
     }
 
-    saveProducts(products) {
-        fs.writeFileSync(this.filePath, JSON.stringify(products, null, 2));
+    saveProducts() {
+        fs.writeFileSync(this.filePath, JSON.stringify(this.products, null, 2));
     }
 }
 
